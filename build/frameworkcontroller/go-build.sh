@@ -36,7 +36,11 @@ cd ${PROJECT_DIR}
 rm -rf ${DIST_DIR}
 mkdir -p ${DIST_DIR}
 
-go build -o ${DIST_DIR}/frameworkcontroller cmd/frameworkcontroller/*
+export CGO_ENABLED=1
+export CGO_CFLAGS="-fstack-protector-strong -O2 -D_FORTIFY_SOURCE=2"
+export CGO_LDFLAGS="-Wl,-z,relro"
+go build -buildmode=pie -o ${DIST_DIR}/frameworkcontroller cmd/frameworkcontroller/*
+
 chmod a+x ${DIST_DIR}/frameworkcontroller
 cp -r bin/frameworkcontroller/* ${DIST_DIR}
 cp -r example/config/default/* ${DIST_DIR}
