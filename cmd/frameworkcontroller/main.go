@@ -38,7 +38,7 @@ func main() {
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 
-	go controller.NewQueueFrameworkController().Run(stopCh)
+	go controller.NewFrameworkController().Run(stopCh)
 
 	sigTerm := make(chan os.Signal, 1)
 	signal.Notify(sigTerm, syscall.SIGTERM)

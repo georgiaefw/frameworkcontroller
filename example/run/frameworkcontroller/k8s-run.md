@@ -31,6 +31,7 @@ spec:
         env:
         # May not need to specify KUBE_APISERVER_ADDRESS if the target
         # cluster to control is the cluster running the StatefulSet.
+        # See k8s inClusterConfig.
         - name: KUBE_APISERVER_ADDRESS
           value: {http[s]://host:port}
 ```
