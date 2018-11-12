@@ -31,6 +31,7 @@ spec:
     taskNumber: 3
     frameworkAttemptCompletionPolicy:
       minFailedTaskCount: 1
+      # Succeed the FrameworkAttempt immediately if worker's all Tasks succeeded.
       minSucceededTaskCount: 3
     task:
       retryPolicy:
