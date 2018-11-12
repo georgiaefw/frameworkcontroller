@@ -1,0 +1,115 @@
+# Post to {kubeApiServerAddress}/apis/frameworkcontroller.microsoft.com/v1/namespaces/default/frameworks
+# For the full spec setting and usage, see ./pkg/apis/frameworkcontroller/v1/types.go
+# For the full frameworkbarrier usage, see ./pkg/barrier/barrier.go
+apiVersion: frameworkcontroller.microsoft.com/v1
+kind: Framework
+metadata:
+  name: tensorflowdistributedtraining
+spec:
+  executionType: Start
+  retryPolicy:
+    fancyRetryPolicy: true
+    maxRetryCount: 2
+  taskRoles:
+  - name: ps
+    taskNumber: 3
+    frameworkAttemptCompletionPolicy:
+      minFailedTaskCount: 1
+      minSucceededTaskCount: -1
+    task:
+      retryPolicy:
+        fancyRetryPolicy: false
+        maxRetryCount: 0
+      pod:
+        spec:
+          restartPolicy: Never
+          # Using hostNetwork to avoid network overhead.
+          hostNetwork: true
+          containers:
+          - name: tensorflow
+            image: zichengfang/k8s_launcher:distributedtf
+            workingDir: /benchmarks/scripts/tf_cnn_benchmarks
+            # Using /mnt/frameworkbarrier/injector.sh to inject environment
+            # variables:
+            # {TaskRoleName}_addresses=
+            #   {Task[0].PodIP}:${{TaskRoleName}_port},...,
+            #   {Task[TaskRole.TaskNumber-1].PodIP}:${{TaskRoleName}_port}
+            # See more in ./example/framework/extension/frameworkbarrier.yaml
+            command: [
+            "sh", "-c",
+            "ps_port=4001 worker_port=5001 . /mnt/frameworkbarrier/injector.sh &&
+            python tf_cnn_benchmarks.py --job_name=ps --task_index=${TASK_INDEX}
+            --ps_hosts=${ps_addresses} --worker_hosts=${worker_addresses}
+            --data_name=cifar10 --batch_size=32 --model=alexnet
+            --local_parameter_device=cpu --variable_update=parameter_server"]
+            ports:
+            - containerPort: 4001
+            volumeMounts:
+            - name: frameworkbarrier-volume
+              mountPath: /mnt/frameworkbarrier
+          initContainers:
+          - name: frameworkbarrier
+            # Using local image just to demonstrate this example.
+            imagePullPolicy: Never
+            image: frameworkbarrier
+            # Using k8s inClusterConfig, so usually, no need to specify
+            # KUBE_APISERVER_ADDRESS
+            #env:
+            #- name: KUBE_APISERVER_ADDRESS
+            #  value: {http[s]://host:port}
+            volumeMounts:
+            - name: frameworkbarrier-volume
+              mountPath: /mnt/frameworkbarrier
+          volumes:
+          - name: frameworkbarrier-volume
+            emptyDir: {}
+  - name: worker
+    taskNumber: 2
+    frameworkAttemptCompletionPolicy:
+      minFailedTaskCount: 1
+      # Succeed the FrameworkAttempt immediately if worker's all Tasks succeeded.
+      minSucceededTaskCount: 2
+    task:
+      retryPolicy:
+        fancyRetryPolicy: false
+        maxRetryCount: 0
+      pod:
+        spec:
+          restartPolicy: Never
+          hostNetwork: true
+          containers:
+          - name: tensorflow
+            image: zichengfang/k8s_launcher:distributedtf
+            workingDir: /benchmarks/scripts/tf_cnn_benchmarks
+            command: [
+            "sh", "-c",
+            "ps_port=4001 worker_port=5001 . /mnt/frameworkbarrier/injector.sh &&
+            python tf_cnn_benchmarks.py --job_name=worker --task_index=${TASK_INDEX}
+            --ps_hosts=${ps_addresses} --worker_hosts=${worker_addresses}
+            --data_name=cifar10 --batch_size=32 --model=alexnet
+            --local_parameter_device=cpu --variable_update=parameter_server
+            --data_dir=/mnt/data/cifar-10-batches-py/ --data_format=NHWC"]
+            ports:
+            - containerPort: 5001
+            volumeMounts:
+            - name: frameworkbarrier-volume
+              mountPath: /mnt/frameworkbarrier
+            - name: data-volume
+              mountPath: /mnt/data
+          initContainers:
+          - name: frameworkbarrier
+            imagePullPolicy: Never
+            image: frameworkbarrier
+            #env:
+            #- name: KUBE_APISERVER_ADDRESS
+            #  value: {http[s]://host:port}
+            volumeMounts:
+            - name: frameworkbarrier-volume
+              mountPath: /mnt/frameworkbarrier
+          volumes:
+          - name: frameworkbarrier-volume
+            emptyDir: {}
+          - name: data-volume
+            nfs:
+              server: 10.169.8.232
+              path: /home/yqwang/nfs
