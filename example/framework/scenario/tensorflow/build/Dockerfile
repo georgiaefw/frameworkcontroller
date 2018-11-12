@@ -21,7 +21,7 @@
 # SOFTWARE
 
 # Add tensorflow/tensorflow
-FROM tensorflow/tensorflow:1.12.0-devel
+FROM tensorflow/tensorflow:1.12.0-devel-gpu
 
 ENV PROJECT_DIR=/tensorflow
 WORKDIR ${PROJECT_DIR}
