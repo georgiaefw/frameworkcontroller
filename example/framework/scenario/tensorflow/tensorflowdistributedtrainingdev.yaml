@@ -28,7 +28,7 @@ spec:
           containers:
           - name: tensorflow
             image: wang17/tfe:gpu
-            workingDir: /benchmarks/scripts/tf_cnn_benchmarks
+            workingDir: /tensorflow/benchmarks/scripts/tf_cnn_benchmarks
             # Using /mnt/frameworkbarrier/injector.sh to inject environment
             # variables:
             # {TaskRoleName}_addresses=
@@ -85,7 +85,7 @@ spec:
           containers:
           - name: tensorflow
             image: wang17/tfe:gpu
-            workingDir: /benchmarks/scripts/tf_cnn_benchmarks
+            workingDir: /tensorflow/benchmarks/scripts/tf_cnn_benchmarks
             command: [
             "sh", "-c",
             "ps_port=4001 worker_port=5001 . /mnt/frameworkbarrier/injector.sh &&
