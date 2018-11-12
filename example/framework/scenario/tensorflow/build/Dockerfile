@@ -26,9 +26,6 @@ FROM tensorflow/tensorflow:1.12.0-devel
 ENV PROJECT_DIR=/tensorflow
 WORKDIR ${PROJECT_DIR}
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates build-essential git
-
 # Add tensorflow/benchmarks
 RUN git clone --branch=cnn_tf_v1.12_compatible --depth=1 \
     https://github.com/tensorflow/benchmarks
