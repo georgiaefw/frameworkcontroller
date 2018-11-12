@@ -33,8 +33,8 @@ if [ "${PROCESSOR_TYPE}" = "gpu" ]; then
 elif [ "${PROCESSOR_TYPE}" = "cpu" ]; then
   TENSORFLOW_IMAGE_TAG_SUFFIX=""
 else
-  echo "Failed to build docker image ${IMAGE_NAME}: " \
-    "Only supports cpu or gpu processor type, " \
+  echo "Failed to build docker image ${IMAGE_NAME}:" \
+    "Only supports cpu or gpu processor type," \
     "but provided processor type is ${PROCESSOR_TYPE}" 1>&2
   exit 1
 fi
