@@ -41,12 +41,15 @@ spec:
             python tf_cnn_benchmarks.py --job_name=ps --task_index=${TASK_INDEX}
             --ps_hosts=${ps_addresses} --worker_hosts=${worker_addresses}
             --data_name=cifar10 --batch_size=32 --model=alexnet
-            --local_parameter_device=cpu --variable_update=parameter_server"]
+            --local_parameter_device=cpu --variable_update=parameter_server
+            --data_format=NHWC --train_dir=/mnt/data/${FRAMEWORK_NAME}-output"]
             ports:
             - containerPort: 4001
             volumeMounts:
             - name: frameworkbarrier-volume
               mountPath: /mnt/frameworkbarrier
+            - name: data-volume
+              mountPath: /mnt/data
           initContainers:
           - name: frameworkbarrier
             image: wang17/fb:incluster
@@ -61,6 +64,10 @@ spec:
           volumes:
           - name: frameworkbarrier-volume
             emptyDir: {}
+          - name: data-volume
+            nfs:
+              server: 10.169.8.232
+              path: /home/yqwang/nfs
   - name: worker
     taskNumber: 2
     frameworkAttemptCompletionPolicy:
@@ -86,7 +93,7 @@ spec:
             --ps_hosts=${ps_addresses} --worker_hosts=${worker_addresses}
             --data_name=cifar10 --batch_size=32 --model=alexnet
             --local_parameter_device=cpu --variable_update=parameter_server
-            --data_dir=/mnt/data/cifar-10-batches-py/ --data_format=NHWC"]
+            --data_format=NHWC --train_dir=/mnt/data/${FRAMEWORK_NAME}-output"]
             ports:
             - containerPort: 5001
             volumeMounts:
