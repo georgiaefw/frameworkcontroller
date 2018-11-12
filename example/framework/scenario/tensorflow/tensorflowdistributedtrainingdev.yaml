@@ -27,7 +27,7 @@ spec:
           hostNetwork: true
           containers:
           - name: tensorflow
-            image: zichengfang/k8s_launcher:distributedtf
+            image: wang17/tfe:gpu
             workingDir: /benchmarks/scripts/tf_cnn_benchmarks
             # Using /mnt/frameworkbarrier/injector.sh to inject environment
             # variables:
@@ -84,7 +84,7 @@ spec:
           hostNetwork: true
           containers:
           - name: tensorflow
-            image: zichengfang/k8s_launcher:distributedtf
+            image: wang17/tfe:gpu
             workingDir: /benchmarks/scripts/tf_cnn_benchmarks
             command: [
             "sh", "-c",
