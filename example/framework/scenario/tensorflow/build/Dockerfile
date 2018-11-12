@@ -21,14 +21,15 @@
 # SOFTWARE
 
 # Add tensorflow/tensorflow
-FROM tensorflow/tensorflow:1.12.0-devel-gpu
+ARG IMAGE_TAG_SUFFIX
+FROM tensorflow/tensorflow:1.12.0-devel${IMAGE_TAG_SUFFIX}
 
 ENV PROJECT_DIR=/tensorflow
 WORKDIR ${PROJECT_DIR}
 
 # Add tensorflow/benchmarks
 RUN git clone --branch=cnn_tf_v1.12_compatible --depth=1 \
-    https://github.com/tensorflow/benchmarks
+  https://github.com/tensorflow/benchmarks.git
 
 RUN ls -l .
 

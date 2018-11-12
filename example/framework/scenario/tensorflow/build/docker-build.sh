@@ -26,12 +26,21 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+if [ $1 = "gpu" ]; then
+  IMAGE_TAG="gpu"
+  TENSORFLOW_IMAGE_TAG_SUFFIX="-gpu"
+else
+  IMAGE_TAG="cpu"
+  TENSORFLOW_IMAGE_TAG_SUFFIX=""
+fi
+
 BASH_DIR=$(cd $(dirname ${BASH_SOURCE}) && pwd)
 PROJECT_DIR=${BASH_DIR}
-IMAGE_NAME=tensorflow-examples
+IMAGE_NAME=tensorflow-examples:${IMAGE_TAG}
 
 cd ${PROJECT_DIR}
 
-docker build -t ${IMAGE_NAME} -f ${BASH_DIR}/Dockerfile .
+docker build -t ${IMAGE_NAME} -f ${BASH_DIR}/Dockerfile \
+  --build-arg IMAGE_TAG_SUFFIX=${TENSORFLOW_IMAGE_TAG_SUFFIX} .
 
 echo Succeeded to build docker image ${IMAGE_NAME}
