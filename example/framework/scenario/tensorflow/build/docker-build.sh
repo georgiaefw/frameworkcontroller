@@ -23,20 +23,24 @@
 # SOFTWARE
 
 set -o errexit
-set -o nounset
 set -o pipefail
 
-if [ $1 = "gpu" ]; then
-  IMAGE_TAG="gpu"
+PROCESSOR_TYPE=${1}
+IMAGE_NAME=tensorflow-examples:${PROCESSOR_TYPE}
+
+if [ "${PROCESSOR_TYPE}" = "gpu" ]; then
   TENSORFLOW_IMAGE_TAG_SUFFIX="-gpu"
-else
-  IMAGE_TAG="cpu"
+elif [ "${PROCESSOR_TYPE}" = "cpu" ]; then
   TENSORFLOW_IMAGE_TAG_SUFFIX=""
+else
+  echo "Failed to build docker image ${IMAGE_NAME}: " \
+    "Only supports cpu or gpu processor type, " \
+    "but provided processor type is ${PROCESSOR_TYPE}" 1>&2
+  exit 1
 fi
 
 BASH_DIR=$(cd $(dirname ${BASH_SOURCE}) && pwd)
 PROJECT_DIR=${BASH_DIR}
-IMAGE_NAME=tensorflow-examples:${IMAGE_TAG}
 
 cd ${PROJECT_DIR}
 
